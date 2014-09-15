@@ -157,6 +157,7 @@ func TestPoolClose(t *testing.T) {
 	}
 
 	c2.Close()
+	c2.Close()
 
 	p.Close()
 
@@ -168,7 +169,7 @@ func TestPoolClose(t *testing.T) {
 
 	c3.Close()
 
-	d.check("after channel close", p, 3, 0)
+	d.check("after conn close", p, 3, 0)
 
 	c1 = p.Get()
 	if _, err := c1.Do("PING"); err == nil {
@@ -201,9 +202,35 @@ func TestPoolTimeout(t *testing.T) {
 	c.Close()
 
 	d.check("2", p, 2, 1)
+
+	p.Close()
 }
 
-func TestBorrowCheck(t *testing.T) {
+func TestPoolConcurrenSendReceive(t *testing.T) {
+	p := &Pool{
+		Dial: DialTestDB,
+	}
+	c := p.Get()
+	done := make(chan error, 1)
+	go func() {
+		_, err := c.Receive()
+		done <- err
+	}()
+	c.Send("PING")
+	c.Flush()
+	err := <-done
+	if err != nil {
+		t.Fatalf("Receive() returned error %v", err)
+	}
+	_, err = c.Do("")
+	if err != nil {
+		t.Fatalf("Do() returned error %v", err)
+	}
+	c.Close()
+	p.Close()
+}
+
+func TestPoolBorrowCheck(t *testing.T) {
 	d := poolDialer{t: t}
 	p := &Pool{
 		MaxIdle:      2,
@@ -217,9 +244,10 @@ func TestBorrowCheck(t *testing.T) {
 		c.Close()
 	}
 	d.check("1", p, 10, 1)
+	p.Close()
 }
 
-func TestMaxActive(t *testing.T) {
+func TestPoolMaxActive(t *testing.T) {
 	d := poolDialer{t: t}
 	p := &Pool{
 		MaxIdle:   2,
@@ -250,9 +278,10 @@ func TestMaxActive(t *testing.T) {
 	c3.Close()
 
 	d.check("4", p, 2, 2)
+	p.Close()
 }
 
-func TestMonitorCleanup(t *testing.T) {
+func TestPoolMonitorCleanup(t *testing.T) {
 	d := poolDialer{t: t}
 	p := &Pool{
 		MaxIdle:   2,
@@ -264,9 +293,10 @@ func TestMonitorCleanup(t *testing.T) {
 	c.Close()
 
 	d.check("", p, 1, 0)
+	p.Close()
 }
 
-func TestPubSubCleanup(t *testing.T) {
+func TestPoolPubSubCleanup(t *testing.T) {
 	d := poolDialer{t: t}
 	p := &Pool{
 		MaxIdle:   2,
@@ -293,9 +323,11 @@ func TestPubSubCleanup(t *testing.T) {
 		t.Errorf("got commands %v, want %v", d.commands, want)
 	}
 	d.commands = nil
+
+	p.Close()
 }
 
-func TestTransactionCleanup(t *testing.T) {
+func TestPoolTransactionCleanup(t *testing.T) {
 	d := poolDialer{t: t}
 	p := &Pool{
 		MaxIdle:   2,
@@ -363,4 +395,60 @@ func TestTransactionCleanup(t *testing.T) {
 		t.Errorf("got commands %v, want %v", d.commands, want)
 	}
 	d.commands = nil
+
+	p.Close()
+}
+
+func BenchmarkPoolGet(b *testing.B) {
+	b.StopTimer()
+	p := Pool{Dial: DialTestDB, MaxIdle: 2}
+	c := p.Get()
+	if err := c.Err(); err != nil {
+		b.Fatal(err)
+	}
+	c.Close()
+	defer p.Close()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		c = p.Get()
+		c.Close()
+	}
+}
+
+func BenchmarkPoolGetErr(b *testing.B) {
+	b.StopTimer()
+	p := Pool{Dial: DialTestDB, MaxIdle: 2}
+	c := p.Get()
+	if err := c.Err(); err != nil {
+		b.Fatal(err)
+	}
+	c.Close()
+	defer p.Close()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		c = p.Get()
+		if err := c.Err(); err != nil {
+			b.Fatal(err)
+		}
+		c.Close()
+	}
+}
+
+func BenchmarkPoolGetPing(b *testing.B) {
+	b.StopTimer()
+	p := Pool{Dial: DialTestDB, MaxIdle: 2}
+	c := p.Get()
+	if err := c.Err(); err != nil {
+		b.Fatal(err)
+	}
+	c.Close()
+	defer p.Close()
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		c = p.Get()
+		if _, err := c.Do("PING"); err != nil {
+			b.Fatal(err)
+		}
+		c.Close()
+	}
 }
