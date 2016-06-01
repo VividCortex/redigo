@@ -99,13 +99,14 @@
 //
 // Concurrency
 //
-// Connections support a single concurrent caller to the write methods (Send,
-// Flush) and a single concurrent caller to the read method (Receive). Because
-// Do method combines the functionality of Send, Flush and Receive, the Do
-// method cannot be called concurrently with the other methods.
+// Connections support one concurrent caller to the Recieve method and one
+// concurrent caller to the Send and Flush methods. No other concurrency is
+// supported including concurrent calls to the Do method.
 //
-// For full concurrent access to Redis, use the thread-safe Pool to get and
-// release connections from within a goroutine.
+// For full concurrent access to Redis, use the thread-safe Pool to get, use
+// and release a connection from within a goroutine. Connections returned from
+// a Pool have the concurrency restrictions described in the previous
+// paragraph.
 //
 // Publish and Subscribe
 //
@@ -126,7 +127,7 @@
 // send and flush a subscription management command. The receive method
 // converts a pushed message to convenient types for use in a type switch.
 //
-//  psc := PubSubConn{c}
+//  psc := redis.PubSubConn{c}
 //  psc.Subscribe("example")
 //  for {
 //      switch v := psc.Receive().(type) {
@@ -164,4 +165,4 @@
 //   if _, err := redis.Scan(reply, &value1, &value2); err != nil {
 //      // handle error
 //  }
-package redis
+package redis // import "github.com/garyburd/redigo/redis"
