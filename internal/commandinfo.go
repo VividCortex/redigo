@@ -12,7 +12,11 @@
 // License for the specific language governing permissions and limitations
 // under the License.
 
+<<<<<<< HEAD
 package internal // import "github.com/VividCortex/redigo/internal"
+=======
+package internal // import "github.com/gomodule/redigo/internal"
+>>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 
 import (
 	"strings"

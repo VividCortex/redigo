@@ -18,8 +18,13 @@ import (
 	"errors"
 	"sync"
 
+<<<<<<< HEAD
 	"github.com/VividCortex/redigo/internal"
 	"github.com/VividCortex/redigo/redis"
+=======
+	"github.com/gomodule/redigo/internal"
+	"github.com/gomodule/redigo/redis"
+>>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 )
 
 // ConnMux multiplexes one or more connections to a single underlying

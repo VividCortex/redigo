@@ -14,7 +14,11 @@
 
 // Package redis is a client for the Redis database.
 //
+<<<<<<< HEAD
 // The Redigo FAQ (https://github.com/VividCortex/redigo/wiki/FAQ) contains more
+=======
+// The Redigo FAQ (https://github.com/gomodule/redigo/wiki/FAQ) contains more
+>>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 // documentation about this package.
 //
 // Connections
@@ -38,7 +42,7 @@
 //
 //  n, err := conn.Do("APPEND", "key", "value")
 //
-// The Do method converts command arguments to binary strings for transmission
+// The Do method converts command arguments to bulk strings for transmission
 // to the server as follows:
 //
 //  Go Type                 Conversion
@@ -48,7 +52,7 @@
 //  float64                 strconv.FormatFloat(v, 'g', -1, 64)
 //  bool                    true -> "1", false -> "0"
 //  nil                     ""
-//  all other types         fmt.Print(v)
+//  all other types         fmt.Fprint(w, v)
 //
 // Redis command reply types are represented using the following Go types:
 //
@@ -99,7 +103,7 @@
 //
 // Concurrency
 //
-// Connections support one concurrent caller to the Recieve method and one
+// Connections support one concurrent caller to the Receive method and one
 // concurrent caller to the Send and Flush methods. No other concurrency is
 // supported including concurrent calls to the Do method.
 //
@@ -127,7 +131,7 @@
 // send and flush a subscription management command. The receive method
 // converts a pushed message to convenient types for use in a type switch.
 //
-//  psc := redis.PubSubConn{c}
+//  psc := redis.PubSubConn{Conn: c}
 //  psc.Subscribe("example")
 //  for {
 //      switch v := psc.Receive().(type) {
@@ -165,4 +169,17 @@
 //   if _, err := redis.Scan(reply, &value1, &value2); err != nil {
 //      // handle error
 //  }
+<<<<<<< HEAD
 package redis // import "github.com/VividCortex/redigo/redis"
+=======
+//
+// Errors
+//
+// Connection methods return error replies from the server as type redis.Error.
+//
+// Call the connection Err() method to determine if the connection encountered
+// non-recoverable error such as a network error or protocol parsing error. If
+// Err() returns a non-nil value, then the connection is not usable and should
+// be closed.
+package redis // import "github.com/gomodule/redigo/redis"
+>>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821

@@ -16,7 +16,12 @@ package redis_test
 
 import (
 	"fmt"
+<<<<<<< HEAD
 	"github.com/VividCortex/redigo/redis"
+=======
+
+	"github.com/gomodule/redigo/redis"
+>>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 )
 
 // zpop pops a value from the ZSET key using WATCH/MULTI/EXEC commands.

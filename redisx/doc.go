@@ -14,4 +14,8 @@
 
 // Package redisx contains experimental features for Redigo. Features in this
 // package may be modified or deleted at any time.
+<<<<<<< HEAD
 package redisx // import "github.com/VividCortex/redigo/redisx"
+=======
+package redisx // import "github.com/gomodule/redigo/redisx"
+>>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
