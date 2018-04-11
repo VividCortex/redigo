@@ -25,16 +25,12 @@ import (
 	"sync/atomic"
 	"time"
 
-<<<<<<< HEAD
 	"github.com/VividCortex/redigo/internal"
-=======
-	"github.com/gomodule/redigo/internal"
 )
 
 var (
 	_ ConnWithTimeout = (*activeConn)(nil)
 	_ ConnWithTimeout = (*errorConn)(nil)
->>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 )
 
 var nowFunc = time.Now // for testing

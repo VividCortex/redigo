@@ -14,11 +14,7 @@
 
 // Package redis is a client for the Redis database.
 //
-<<<<<<< HEAD
 // The Redigo FAQ (https://github.com/VividCortex/redigo/wiki/FAQ) contains more
-=======
-// The Redigo FAQ (https://github.com/gomodule/redigo/wiki/FAQ) contains more
->>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 // documentation about this package.
 //
 // Connections
@@ -169,17 +165,4 @@
 //   if _, err := redis.Scan(reply, &value1, &value2); err != nil {
 //      // handle error
 //  }
-<<<<<<< HEAD
 package redis // import "github.com/VividCortex/redigo/redis"
-=======
-//
-// Errors
-//
-// Connection methods return error replies from the server as type redis.Error.
-//
-// Call the connection Err() method to determine if the connection encountered
-// non-recoverable error such as a network error or protocol parsing error. If
-// Err() returns a non-nil value, then the connection is not usable and should
-// be closed.
-package redis // import "github.com/gomodule/redigo/redis"
->>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821

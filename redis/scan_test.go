@@ -21,11 +21,7 @@ import (
 	"testing"
 	"time"
 
-<<<<<<< HEAD
 	"github.com/VividCortex/redigo/redis"
-=======
-	"github.com/gomodule/redigo/redis"
->>>>>>> 9352ab68be133885e31a43661cc42a220cb8e821
 )
 
 type durationScan struct {
