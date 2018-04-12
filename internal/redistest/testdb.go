@@ -19,7 +19,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/VividCortex/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 )
 
 type testConn struct {
