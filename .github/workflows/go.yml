@@ -25,7 +25,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Replace imports
-      run: sed -i '.bak' 's+github.com/gomodule/redigo/+github.com/VividCortex/redigo/+' redis/*_test.go redisx/*_test.go
+      run: sed -i.bak 's+github.com/gomodule/redigo/+github.com/VividCortex/redigo/+' redis/*_test.go redisx/*_test.go
 
     - name: go vet
       run: go vet ./...
