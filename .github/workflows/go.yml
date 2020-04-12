@@ -28,16 +28,12 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
       with:
-        path: ./src/github.com/${{ github.repository }}
+        path: src/github.com/VividCortex/redigo
 
-    - name: Replace imports
-      run: sed -i.bak 's+github.com/gomodule/redigo/+github.com/VividCortex/redigo/+' redis/*_test.go redisx/*_test.go
-
-    - name: go get
-      run: go get -t -v ./...
-
-    - name: go vet
-      run: go vet ./...
-
-    - name: go test
-      run: go test ./...
+    - name: Replace imports and test
+      run: |
+        cd src/github.com/VividCortex/redigo
+        sed -i.bak 's+github.com/gomodule/redigo/+github.com/VividCortex/redigo/+' redis/*_test.go redisx/*_test.go
+        go get -t -v ./...
+        go vet ./...
+        go test -race ./...
