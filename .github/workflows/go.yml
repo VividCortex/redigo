@@ -20,6 +20,11 @@ jobs:
       GO111MODULE: off
 
     steps:
+    - name: Set up Redis
+      run: |
+        sudo apt -qq -y update > /dev/null 2>&1 && sudo apt -qq -y install redis-server > /dev/null 2>&1
+        sudo service redis-server start
+
     - name: Set up Go
       uses: actions/setup-go@v1
       with:
@@ -30,7 +35,7 @@ jobs:
       with:
         path: src/github.com/VividCortex/redigo
 
-    - name: Replace imports and test
+    - name: Test
       run: |
         cd src/github.com/VividCortex/redigo
         sed -i.bak 's+github.com/gomodule/redigo/+github.com/VividCortex/redigo/+' redis/*_test.go redisx/*_test.go
