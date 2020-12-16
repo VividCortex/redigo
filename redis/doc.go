@@ -14,7 +14,7 @@
 
 // Package redis is a client for the Redis database.
 //
-// The Redigo FAQ (https://github.com/VividCortex/redigo/wiki/FAQ) contains more
+// The Redigo FAQ (https://github.com/gomodule/redigo/wiki/FAQ) contains more
 // documentation about this package.
 //
 // Connections
@@ -101,7 +101,7 @@
 //
 // Connections support one concurrent caller to the Receive method and one
 // concurrent caller to the Send and Flush methods. No other concurrency is
-// supported including concurrent calls to the Do method.
+// supported including concurrent calls to the Do and Close methods.
 //
 // For full concurrent access to Redis, use the thread-safe Pool to get, use
 // and release a connection from within a goroutine. Connections returned from
@@ -165,4 +165,13 @@
 //   if _, err := redis.Scan(reply, &value1, &value2); err != nil {
 //      // handle error
 //  }
-package redis // import "github.com/VividCortex/redigo/redis"
+//
+// Errors
+//
+// Connection methods return error replies from the server as type redis.Error.
+//
+// Call the connection Err() method to determine if the connection encountered
+// non-recoverable error such as a network error or protocol parsing error. If
+// Err() returns a non-nil value, then the connection is not usable and should
+// be closed.
+package redis

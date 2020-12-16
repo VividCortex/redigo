@@ -1,0 +1,44 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: [ '1.14', '1.13', '1.12', '1.11' ]
+    name: Build with ${{ matrix.go }}
+
+    env:
+      GOPATH: ${{ github.workspace }}
+      GO111MODULE: off
+
+    steps:
+    - name: Set up Redis
+      run: |
+        sudo apt -qq -y update > /dev/null 2>&1 && sudo apt -qq -y install redis-server > /dev/null 2>&1
+        sudo service redis-server start
+
+    - name: Set up Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Check out code
+      uses: actions/checkout@v2
+      with:
+        path: src/github.com/VividCortex/redigo
+
+    - name: Test
+      run: |
+        cd src/github.com/VividCortex/redigo
+        sed -i.bak 's+github.com/gomodule/redigo/+github.com/VividCortex/redigo/+' redis/*_test.go redisx/*_test.go
+        go get -t -v ./...
+        go vet ./...
+        go test -race ./...

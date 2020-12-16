@@ -170,6 +170,10 @@ var readTests = []struct {
 		"PONG",
 	},
 	{
+		"+OK\n\n", // no \r
+		errorSentinel,
+	},
+	{
 		"@OK\r\n",
 		errorSentinel,
 	},
@@ -207,6 +211,11 @@ var readTests = []struct {
 	},
 
 	{
+		// "" is not a valid length
+		"$\r\nfoobar\r\n",
+		errorSentinel,
+	},
+	{
 		// "x" is not a valid length
 		"$x\r\nfoobar\r\n",
 		errorSentinel,
@@ -214,6 +223,11 @@ var readTests = []struct {
 	{
 		// -2 is not a valid length
 		"$-2\r\n",
+		errorSentinel,
+	},
+	{
+		// ""  is not a valid integer
+		":\r\n",
 		errorSentinel,
 	},
 	{
@@ -253,6 +267,30 @@ func TestRead(t *testing.T) {
 			}
 			if !reflect.DeepEqual(actual, tt.expected) {
 				t.Errorf("Receive(%q) = %v, want %v", tt.reply, actual, tt.expected)
+			}
+		}
+	}
+}
+
+func TestReadString(t *testing.T) {
+	// n is value of bufio.defaultBufSize
+	const n = 4096
+
+	// Test read string lengths near bufio.Reader buffer boundaries.
+	testRanges := [][2]int{{0, 64}, {n - 64, n + 64}, {2*n - 64, 2*n + 64}}
+
+	p := make([]byte, 2*n+64)
+	for i := range p {
+		p[i] = byte('a' + i%26)
+	}
+	s := string(p)
+
+	for _, r := range testRanges {
+		for i := r[0]; i < r[1]; i++ {
+			c, _ := redis.Dial("", "", dialTestConn("+"+s[:i]+"\r\n", nil))
+			actual, err := c.Receive()
+			if err != nil || actual != s[:i] {
+				t.Fatalf("Receive(string len %d) -> err=%v, equal=%v", i, err, actual != s[:i])
 			}
 		}
 	}
@@ -364,7 +402,7 @@ func TestPipelineCommands(t *testing.T) {
 	}
 }
 
-func TestBlankCommmand(t *testing.T) {
+func TestBlankCommand(t *testing.T) {
 	c, err := redis.DialDefaultServer()
 	if err != nil {
 		t.Fatalf("error connection to database, %v", err)
@@ -515,6 +553,10 @@ var dialErrors = []struct {
 		"redis://localhost:6379/abc123",
 		"invalid database: abc123",
 	},
+	{
+		"redis:foo//localhost:6379",
+		"invalid redis URL, url is opaque: redis:foo//localhost:6379",
+	},
 }
 
 func TestDialURLErrors(t *testing.T) {
@@ -631,6 +673,43 @@ func TestDialTLSSKipVerify(t *testing.T) {
 		t.Fatal("dial error:", err)
 	}
 	checkPingPong(t, &buf, c)
+}
+
+func TestDialClientName(t *testing.T) {
+	var buf bytes.Buffer
+	_, err := redis.Dial("tcp", ":6379",
+		dialTestConn(pingResponse, &buf),
+		redis.DialClientName("redis-connection"),
+	)
+	if err != nil {
+		t.Fatal("dial error:", err)
+	}
+	expected := "*3\r\n$6\r\nCLIENT\r\n$7\r\nSETNAME\r\n$16\r\nredis-connection\r\n"
+	if w := buf.String(); w != expected {
+		t.Errorf("got %q, want %q", w, expected)
+	}
+
+	// testing against a real server
+	connectionName := "test-connection"
+	c, err := redis.DialDefaultServer(redis.DialClientName(connectionName))
+	if err != nil {
+		t.Fatalf("error connection to database, %v", err)
+	}
+	defer c.Close()
+
+	v, err := c.Do("CLIENT", "GETNAME")
+	if err != nil {
+		t.Fatalf("CLIENT GETNAME returned error %v", err)
+	}
+
+	vs, err := redis.String(v, nil)
+	if err != nil {
+		t.Fatalf("String(v) returned error %v", err)
+	}
+
+	if vs != connectionName {
+		t.Fatalf("wrong connection name. Got '%s', expected '%s'", vs, connectionName)
+	}
 }
 
 // Connect to local instance of Redis running on the default port.
